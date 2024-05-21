@@ -9,7 +9,7 @@
 
 		/* width */
 		::-webkit-scrollbar {
-			width: 5px;
+			width: 0.5rem;
 		}
 
 		/* Track */
@@ -295,11 +295,26 @@
 
 						key2 = boldwordinstring(input, key2)
 						
-						resultDiv.innerHTML = `
-				  <small>${avail}</small>
-				  <a onclick="window.open('${results[key]}')">${key2}</a>
-				  <p>${desc}</p>
-				`;
+						let smallElement = document.createElement("small");
+						smallElement.innerHTML = avail;
+
+						let anchorElement = document.createElement("a");
+						anchorElement.textContent = key2;
+						anchorElement.href = "#";
+						anchorElement.onclick = function() {
+							if (!window.parent) {
+						  		window.open(results[key]);
+							} else {
+								location.href = results[key];
+							}
+						};
+
+						let paragraphElement = document.createElement("p");
+						paragraphElement.textContent = desc;
+
+						resultDiv.appendChild(smallElement);
+						resultDiv.appendChild(anchorElement);
+						resultDiv.appendChild(paragraphElement);
 						resultsContainer.appendChild(resultDiv);
 					});
 				}
