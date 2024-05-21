@@ -1,0 +1,407 @@
+<html>
+
+<head>
+	<title>Nova New Tab</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<style>
+		@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Seaweed+Script&display=swap');
+
+		/* width */
+		::-webkit-scrollbar {
+			width: 5px;
+		}
+
+		/* Track */
+		::-webkit-scrollbar-track {
+			background: #818181;
+			border-radius: 5px;
+		}
+
+		/* Handle */
+		::-webkit-scrollbar-thumb {
+			background: #2b2b2b;
+			border-radius: 5px;
+		}
+
+		/* Handle on hover */
+		::-webkit-scrollbar-thumb:hover {
+			background: #555;
+		}
+
+		html {
+			height: 100%;
+			width: 100%;
+		}
+
+		button,
+		input,
+		textarea {
+			outline: none;
+		}
+
+		body {
+			margin: 0;
+			height: 100vh;
+			width: 100%;
+			background-color: #f1f1f1;
+			overflow: hidden;
+			background-repeat: no-repeat;
+			background-size: cover;
+			color: white;
+			font-family: 'Poppins', sans-serif;
+			transition: 2s;
+			background-repeat: no-repeat;
+		}
+
+		.logo {
+			font-family: "poppins", sans-serif;
+			color: #101010;
+			font-size: 1.5rem;
+			margin: 10px;
+			margin-right: 1rem;
+		}
+
+		.mains {
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			height: 78px;
+			justify-items: center;
+			flex-wrap: nowrap;
+			justify-content: flex-start;
+			background: white;
+			box-shadow: 0 0 10px #00000080;
+		}
+
+		#news-section {
+			overflow: hidden;
+			overflow-y: scroll;
+			height: calc(50vh + 49px);
+			border-radius: 10px;
+			margin: 0 1rem;
+		}
+
+		.news-item {
+			background: white;
+			color: #1f1f1f;
+			padding: 5px 27px;
+			border-radius: 10px;
+			margin-bottom: 10px;
+		}
+
+		form {
+			margin: 0;
+		}
+
+		.searchbr {
+			border-radius: 25px;
+			padding: 0;
+			background: white;
+			border: 1px solid grey;
+			display: flex;
+			flex-direction: row;
+			flex-wrap: nowrap;
+			padding: 5px;
+		}
+
+		.searchbr input {
+			min-width: 180px;
+			padding: 0px;
+			flex: 1;
+			border: none;
+			margin: 0;
+			display: inline-block;
+			font-size: 1rem;
+			background: transparent;
+			transform: translate(7px, 0px);
+		}
+
+		.searchbr button {
+			color: #4d4d4d;
+			border: 0;
+			margin: 0;
+			background: none;
+		}
+
+		.searchbr button span {
+			font-size: 20px !important;
+		}
+
+		[subb] {
+			height: fit-content;
+			background-color: grey;
+			border: none;
+			padding: 7px 10px;
+			color: white;
+			margin: 1rem;
+			border-radius: 5px;
+		}
+
+		#results {
+			overflow-y: scroll;
+			height: calc(100vh - 98px);
+			margin-top: 10px;
+		}
+
+		.iu {
+			font-size: 10px;
+		}
+
+		.result {
+			color: #1f1f1f;
+			background: white;
+			display: block;
+			max-width: 600px;
+			margin-left: 2rem;
+			margin-top: 16px;
+			margin-bottom: 1rem;
+			border-radius: 7px;
+			transition: .2s;
+			padding: 1rem;
+		}
+
+		.result:hover {
+			box-shadow: 0 3px 5px #00000080;
+		}
+
+		.result p {
+			margin: 0;
+		}
+
+		.result a {
+			margin: 0;
+			font-size: 1.5rem;
+			font-weight: normal;
+			color: dodgerblue;
+			cursor: pointer;
+			display: block;
+		}
+
+		.result h2:hover {
+			text-decoration: underline;
+		}
+
+		#definition small {
+			display: block;
+		}
+
+		#definition h2 {
+			font-weight: normal;
+			font-size: 2rem;
+			display: inline-block;
+		}
+
+		#definition button {
+			display: inline-block;
+			border: 3px solid #68a6ff;
+			border-radius: 50%;
+			padding: 0.3rem;
+			background: white;
+			color: #68a6ff;
+			margin-right: 0.7rem;
+			transition: 0.2s;
+			transform: translateY(0px);
+		}
+
+		#definition button:hover {
+			transform: scale(1.1) translateY(0px);
+			box-shadow: 0px 0px 1rem #7fb2ff;
+		}
+
+		#deffor {
+			text-transform: capitalize;
+			margin: 0.3rem 0 0.5rem 0;
+		}
+	</style>
+	<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6"></script>
+</head>
+
+<body>
+	<div class="mains">
+		<h1 class="logo" id="titlet">Nova </h1>
+		<div class="searchbr">
+			<input placeholder="Search NWP..." id="searchInput">
+			<button onclick="searchmm()"><span class="material-icons">search</span></button>
+
+		</div>
+	</div>
+	<div id="results">
+	</div>
+	<script>
+
+		const resultsContainer = document.getElementById('results');
+		function getTextAfterFirstDot(str) {
+			// Check if there is a dot in the string
+			if (str.indexOf('.') !== -1) {
+				let dotIndex = str.indexOf('.');
+				let textAfterDot = str.substring(dotIndex + 1);
+				return textAfterDot;
+			} else {
+				return str;
+			}
+		}
+		fetch('db.json')
+			.then(response => response.json())
+			.then(data => {
+
+				function fuzzySearch(input, threshold = 0.5) {
+					const keys = Object.keys(data).map(key => ({key}));
+
+					const fuse = new Fuse(keys, {
+						keys: ['key'],
+						threshold: 1 - threshold // Invert threshold as Fuse uses lower values for more strict matching
+					});
+
+					const result = fuse.search(input);
+					const filteredData = {};
+
+					result.forEach(item => {
+						filteredData[item.item.key] = data[item.item.key];
+					});
+
+					return filteredData;
+				}
+
+				// Function to display results
+				function displayResults(results, input) {
+
+					Object.keys(results).forEach(key => {
+						const resultDiv = document.createElement('div');
+						resultDiv.classList.add('result');
+						let key2 = key;
+						var avail = `<span class="material-icons iu">close</span> | ` + results[key];
+						if (key.startsWith("*")) {
+							avail = `<span class="material-icons iu">verified</span> | ` + results[key]
+							key2 = key.substring(1)
+						}
+
+						let desc = "Check it"
+
+						if (key2.includes(".")) {
+							desc = getTextAfterFirstDot(key2);
+							key2 = getTextBeforeFirstDot(key2)
+						} else {
+							desc = results[key];
+						}
+
+						key2 = boldwordinstring(input, key2)
+						
+						resultDiv.innerHTML = `
+				  <small>${avail}</small>
+				  <a onclick="window.open('${results[key]}')">${key2}</a>
+				  <p>${desc}</p>
+				`;
+						resultsContainer.appendChild(resultDiv);
+					});
+				}
+
+				// Event listener for input
+				const inputField = document.getElementById('searchInput');
+				inputField.addEventListener('keyup', async (event) => {
+					if (event.key != "Enter") {
+						return
+					}
+
+					searchmm()
+				});
+				async function searchmm() {
+
+					resultsContainer.innerHTML = '';
+					var input = inputField.value.trim();
+					const filteredData = fuzzySearch(input);
+					let wordLength = input.split(/\s+/).length;
+					if (wordLength == 1 || (wordLength == 2 && input.endsWith("meaning"))) {
+						try {
+							if (input.endsWith("meaning")) {
+								input = input.split(/\s+/)[0]
+							}
+							let x = await fetchLongmanDefinition(input);
+							if (x != null) {
+								resultsContainer.innerHTML += `<div class="result" id="definition">
+							<small>Definition</small>
+			<button onclick="saythisaloud('${input}')"><span class="material-icons">volume_up</span></button><h2 id="deffor">${input}</h2>
+			<p id="definitiontext">${x + "."}</p>
+			
+		</div>`
+							}
+						} catch (error) {
+							console.error('Error fetching definition:', error);
+						}
+					}
+					displayResults(filteredData, input);
+				}
+
+				function getTextBeforeFirstDot(str) {
+					// Check if there is a dot in the string
+					if (str.indexOf('.') !== -1) {
+						// Get the index of the first dot
+						let dotIndex = str.indexOf('.');
+						// Get the text before the first dot using substring
+						let textBeforeDot = str.substring(0, dotIndex);
+						return textBeforeDot;
+					} else {
+						// If there is no dot in the string, return the original string
+						return str;
+					}
+				}
+
+				async function fetchLongmanDefinition(word) {
+					const ldoceURL = `https://www.ldoceonline.com/dictionary/${word}`;
+
+					try {
+						const response = await fetch(ldoceURL);
+						if (!response.ok) {
+							throw new Error("Failed to fetch data from LDOCE.");
+						}
+
+						const htmlContent = await response.text();
+						const parser = new DOMParser();
+						const doc = parser.parseFromString(htmlContent, "text/html");
+						const definition = doc.querySelector(".DEF");
+						return definition ? definition.textContent : null;
+					} catch (error) {
+						console.error(error);
+						return null;
+					}
+				}
+
+				function saythisaloud(text) {
+					if ('speechSynthesis' in window) {
+						const utterance = new SpeechSynthesisUtterance(text);
+						speechSynthesis.speak(utterance);
+					} else {
+						alert('Sorry, your browser does not support Text-to-Speech.');
+					}
+				}
+				var url_string = window.location.href; // Getting the URL of the current page
+				var url = new URL(url_string);
+				var c = url.searchParams.get("c");
+				console.log(c);
+
+				let defsearchvalue = url.searchParams.get('q');
+				if (defsearchvalue) {
+					let searchInput = document.getElementById("searchInput");
+					if (searchInput) {
+						searchInput.value = defsearchvalue;
+						searchmm(); // Assuming searchmm() is defined elsewhere
+					} else {
+						console.error("Element with ID 'searchInput' not found.");
+					}
+				}
+				
+			});
+
+		function boldwordinstring(word, string) {
+			// Using regular expression with word boundaries (\b) to match whole words only
+			const regex = new RegExp('\\b' + word + '\\b', 'gi');
+			// Replace matched words with the same word wrapped in <b> tags
+			const result = string.replace(regex, '<b>$&</b>');
+			return result;
+		}
+	</script>
+
+
+</body>
+
+</html>
