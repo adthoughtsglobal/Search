@@ -327,7 +327,7 @@
 						const resultDiv = document.createElement('div');
 						resultDiv.classList.add('result');
 						resultDiv.innerHTML = `
-						  <p>There were <b>no results</b> for your query, '${input}'. <ul><li>Search in <button onclick="location.href = 'https://www.bing.com/search?q=${input}';">Bing</button>? (suggested)</li>
+						  <p>There were <b>no NWP results</b> for your query, '${input}'. <ul><li>Search in <button onclick="location.href = 'https://www.bing.com/search?q=${input}';">Bing</button>? (suggested)</li>
 						  <li>Search in <button onclick="location.href = 'https://www.google.com/search?q=${input}';">Google</button>?</li></p>
 						  `;
 						
@@ -394,11 +394,15 @@
     const filteredData = fuzzySearch(input);
     let wordLength = input.split(/\s+/).length;
     
-    if (wordLength == 1 || (wordLength == 2 && input.endsWith("meaning"))) {
+    if (wordLength == 1 || (wordLength == 2 && input.endsWith("meaning")) || input.startsWith("what is a") || input.startsWith("what is an") || input.startsWith("what is")) {
         try {
             if (input.endsWith("meaning")) {
                 input = input.split(/\s+/)[0];
             }
+			const isWhatIsQuestion = e.startsWith("what is a") || e.startsWith("what is an") || e.startsWith("what is");
+			 if (isWhatIsQuestion) {			
+				input = input.replace(/^(what is an |what is a |what is )\s*/i, "").replace(/\?$/, "").trim();
+			 }
 
             let x = await fetchLongmanDefinition(input);
             if (x != null) {
