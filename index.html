@@ -304,11 +304,15 @@
 			.then(data => {
 
 				function fuzzySearch(input, threshold = 0.5) {
+					const isWhatIsQuestion = input.startsWith("what is a") || input.startsWith("what is an") || input.startsWith("what is");
+			 if (isWhatIsQuestion) {			
+				input = input.replace(/^(what is an |what is a |what is )\s*/i, "").replace(/\?$/, "").trim();
+			 }
 					const keys = Object.keys(data).map(key => ({key}));
 
 					const fuse = new Fuse(keys, {
 						keys: ['key'],
-						threshold: 1 - threshold // Invert threshold as Fuse uses lower values for more strict matching
+						threshold: 1 - threshold
 					});
 
 					const result = fuse.search(input);
