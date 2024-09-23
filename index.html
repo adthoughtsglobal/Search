@@ -182,6 +182,13 @@
 			text-decoration: underline;
 		}
 
+		.wikiacl {
+    padding: 1rem;
+    background: #3b3b3b;
+    margin: 0.5rem 0;
+    border-radius: 0.5rem;
+}
+
 		#definition small {
 			display: block;
 		}
@@ -331,40 +338,49 @@
 					searchmm()
 				});
 				async function searchmm() {
+    resultsContainer.innerHTML = '';
+    let input = inputField.value.trim();
+    const filteredData = fuzzySearch(input);
+    let wordLength = input.split(/\s+/).length;
+    
+    if (wordLength == 1 || (wordLength == 2 && input.endsWith("meaning"))) {
+        try {
+            if (input.endsWith("meaning")) {
+                input = input.split(/\s+/)[0];
+            }
 
-					resultsContainer.innerHTML = '';
-					var input = inputField.value.trim();
-					const filteredData = fuzzySearch(input);
-					let wordLength = input.split(/\s+/).length;
-					if (wordLength == 1 || (wordLength == 2 && input.endsWith("meaning"))) {
-						try {
-							if (input.endsWith("meaning")) {
-								input = input.split(/\s+/)[0]
-							}
-							let x = await fetchLongmanDefinition(input);
-							if (x != null) {
-								resultsContainer.innerHTML += `<div class="result" id="definition">
-							<small>Definition</small>
-			<button onclick="saythisaloud('${input}')"><span class="material-icons">volume_up</span></button><h2 id="deffor">${input}</h2>
-			<p id="definitiontext">${x + "."}</p>
-			
-		</div>`
-							}
+            let x = await fetchLongmanDefinition(input);
+            if (x != null) {
+                resultsContainer.innerHTML += `
+                    <div class="result" id="definition">
+                        <small>Definition</small>
+                        <button onclick="saythisaloud('${input}')"><span class="material-icons">volume_up</span></button>
+                        <h2 id="deffor">${input}</h2>
+                        <p id="definitiontext">${x + "."}</p>
+                    </div>`;
+            }
 
-							let y = await wikisearch(input,0.5);
-							if (y != null) {
-								resultsContainer.innerHTML += `<div class="result" id="definition">
-							<small>From Wikipedia</small>
-			<p id="definitiontext" style="display: block;margin-top: 0.5rem;">${y}</p>
-			
-		</div>`
-							}
-						} catch (error) {
-							console.error('Error fetching definition:', error);
-						}
-					}
-					displayResults(filteredData, input);
-				}
+            let wikiResultDiv = document.createElement('div');
+            wikiResultDiv.className = 'result';
+            wikiResultDiv.id = 'wikidefcontainer';
+            resultsContainer.appendChild(wikiResultDiv);
+
+            wikisearch(input, 0.5).then(y => {
+                if (y != null) {
+                    wikiResultDiv.innerHTML = `
+                        <small>From Wikipedia</small>
+                        <p id="definitiontext" style="display: block; margin-top: 0.5rem;">${y}</p>`;
+                } else {
+                    wikiResultDiv.remove();
+                }
+            });
+
+        } catch (error) {
+            console.error('Error fetching definition:', error);
+        }
+    }
+    displayResults(filteredData, input);
+}
 
 				function getTextBeforeFirstDot(str) {
 					if (str.indexOf('.') !== -1) {
