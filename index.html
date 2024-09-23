@@ -587,7 +587,7 @@ async function wikisearch(text, threshold = 0.0, numRelatedArticles = 5) {
 
         const snippet = await fetchFirst5Lines(bestMatch.title);
 
-        const formattedResult = `<b>${bestMatch.title}</b> <br> ${snippet}... <a href="https://en.wikipedia.org/wiki/${bestMatch.title}">Learn more</a><br>`;
+        const formattedResult = `<b>${bestMatch.title}</b> <br> ${snippet}... <a href="https://en.wikipedia.org/wiki/${bestMatch.title}">Learn more</a>`;
         return formattedResult;
       } else {
 
