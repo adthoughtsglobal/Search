@@ -348,6 +348,15 @@
 			
 		</div>`
 							}
+
+							let y = await wikisearch(input,0.5);
+							if (y != null) {
+								resultsContainer.innerHTML += `<div class="result" id="definition">
+							<small>Wikipedia</small>
+			<p id="definitiontext">${y + "."}</p>
+			
+		</div>`
+							}
 						} catch (error) {
 							console.error('Error fetching definition:', error);
 						}
@@ -356,15 +365,11 @@
 				}
 
 				function getTextBeforeFirstDot(str) {
-					// Check if there is a dot in the string
 					if (str.indexOf('.') !== -1) {
-						// Get the index of the first dot
 						let dotIndex = str.indexOf('.');
-						// Get the text before the first dot using substring
 						let textBeforeDot = str.substring(0, dotIndex);
 						return textBeforeDot;
 					} else {
-						// If there is no dot in the string, return the original string
 						return str;
 					}
 				}
@@ -422,6 +427,181 @@
 			const result = string.replace(regex, '<b>$&</b>');
 			return result;
 		}
+
+		// wiki
+
+function calculateScore(searchTerm, question) {
+  cl("> Running jaccard test")
+  const normalizedSearchTerm = searchTerm.toLowerCase();
+  const normalizedQuestion = question.toLowerCase();
+
+  const searchWords = new Set(normalizedSearchTerm.split(" "));
+  const questionWords = new Set(normalizedQuestion.split(" "));
+
+  const intersectionSize = [...searchWords].filter((word) =>
+    questionWords.has(word)
+  ).length;
+  const unionSize = searchWords.size + questionWords.size - intersectionSize;
+
+  const jaccardSimilarity = intersectionSize / unionSize;
+
+  return jaccardSimilarity;
+}
+
+async function fetchRelatedArticles(searchTerm, numRelatedArticles) {
+  const apiUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&utf8=1&origin=*&srlimit=${numRelatedArticles}&srsearch=${encodeURIComponent(
+    searchTerm
+  )}`;
+
+  const response = await fetch(apiUrl, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Network response was not ok: ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  return data.query.search.map((result) => ({
+    title: result.title,
+    description: result.snippet.replace(/<\/?[^>]+(>|$)/g, ""),
+  }));
+}
+
+function findBestMatch(searchTerm, results) {
+  const scores = results.map((result) => ({
+    title: result.title,
+    score: calculateScore(searchTerm, result.title),
+  }));
+
+  scores.sort((a, b) => b.score - a.score);
+
+  return scores[0].score > 0.5 ? scores[0] : null;
+}
+
+async function fetchFullText(title) {
+  const fullTextUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&explaintext=true&titles=${encodeURIComponent(
+    title
+  )}&utf8=1&origin=*`;
+
+  const response = await fetch(fullTextUrl, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Network response was not ok: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const pageId = Object.keys(data.query.pages)[0];
+  const fullText = data.query.pages[pageId].extract;
+
+  const first5Lines = fullText.split('\n').slice(0, 3).join('\n');
+
+  return first5Lines.replace(/<\/?[^>]+(>|$)/g, ""); // Remove HTML tags
+}
+
+async function fetchFirst5Lines(title) {
+  const fullTextUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=true&explaintext=true&titles=${encodeURIComponent(
+    title
+  )}&utf8=1&origin=*`;
+
+  const response = await fetch(fullTextUrl, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Network response was not ok: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const pageId = Object.keys(data.query.pages)[0];
+  const fullText = data.query.pages[pageId].extract;
+
+  if (fullText.includes("may refer to:")) {
+    return `Please specify which ${title} you are talking about.`;
+  }
+
+  const sentences = fullText.split(/[.!?]/).filter(sentence => sentence.trim() !== '');
+  const first5Sentences = sentences.slice(0, 5).join('. ');
+
+  return first5Sentences.replace(/<\/?[^>]+(>|$)/g, ""); // Remove HTML tags
+}
+
+async function wikisearch(text, threshold = 0.0, numRelatedArticles = 5) {
+  cl("searching wikipedia");
+  try {
+
+    const apiUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&utf8=1&origin=*&srsearch=${encodeURIComponent(
+      text
+    )}`;
+
+    const response = await fetch(apiUrl, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Network response was not ok: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.query && data.query.search.length > 0) {
+
+      const bestMatch = findBestMatch(text, data.query.search, threshold);
+
+      if (bestMatch) {
+
+        const snippet = await fetchFirst5Lines(bestMatch.title);
+
+        const formattedResult = `<b>${bestMatch.title}</b> <br> ${snippet}... <a href="https://en.wikipedia.org/wiki/${bestMatch.title}">Learn more</a><br>`;
+        cl("> result found with snippet, returning");
+        return formattedResult;
+      } else {
+
+        const relatedArticles = await fetchRelatedArticles(text, numRelatedArticles);
+
+        if (relatedArticles.length > 0) {
+
+          const formattedResults = relatedArticles.map(
+            (article) =>
+              `<div class="wikiacl"><b>${article.title}</b> :  ${article.description}... <a href="https://en.wikipedia.org/wiki/${article.title}">Learn more</a></div>`
+          );
+          cl("> no single result meets the threshold, returning related articles");
+          return formattedResults.join("");
+        } else {
+
+          cl("> no related articles");
+          return null;
+        }
+      }
+    } else {
+
+      cl("> no results");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error during Wiki search:", error);
+    throw error;
+  }
+}
 	</script>
 
 
