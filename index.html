@@ -220,6 +220,57 @@
 			text-transform: capitalize;
 			margin: 0.3rem 0 0.5rem 0;
 		}
+
+		.loader33 {
+	width: 5px;
+	height: 3px;
+	border-radius: var(--sizing-border-radius-full);
+	display: block;
+	margin: 15px auto;
+	position: relative;
+	color: #ffffff;
+	left: -100px;
+	box-sizing: border-box;
+	animation: shadowRolling 2s linear infinite;
+}
+
+@keyframes shadowRolling {
+	0% {
+		box-shadow: 0px 0 rgba(255, 255, 255, 0), 0px 0 rgba(255, 255, 255, 0), 0px 0 rgba(255, 255, 255, 0), 0px 0 rgba(255, 255, 255, 0);
+	}
+
+	12% {
+		box-shadow: 100px 0 white, 0px 0 rgba(255, 255, 255, 0), 0px 0 rgba(255, 255, 255, 0), 0px 0 rgba(255, 255, 255, 0);
+	}
+
+	25% {
+		box-shadow: 110px 0 white, 100px 0 white, 0px 0 rgba(255, 255, 255, 0), 0px 0 rgba(255, 255, 255, 0);
+	}
+
+	36% {
+		box-shadow: 120px 0 white, 110px 0 white, 100px 0 white, 0px 0 rgba(255, 255, 255, 0);
+	}
+
+	50% {
+		box-shadow: 130px 0 white, 120px 0 white, 110px 0 white, 100px 0 white;
+	}
+
+	62% {
+		box-shadow: 200px 0 rgba(255, 255, 255, 0), 130px 0 white, 120px 0 white, 110px 0 white;
+	}
+
+	75% {
+		box-shadow: 200px 0 rgba(255, 255, 255, 0), 200px 0 rgba(255, 255, 255, 0), 130px 0 white, 120px 0 white;
+	}
+
+	87% {
+		box-shadow: 200px 0 rgba(255, 255, 255, 0), 200px 0 rgba(255, 255, 255, 0), 200px 0 rgba(255, 255, 255, 0), 130px 0 white;
+	}
+
+	100% {
+		box-shadow: 200px 0 rgba(255, 255, 255, 0), 200px 0 rgba(255, 255, 255, 0), 200px 0 rgba(255, 255, 255, 0), 200px 0 rgba(255, 255, 255, 0);
+	}
+}
 	</style>
 	<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6"></script>
 </head>
@@ -363,9 +414,13 @@
             let wikiResultDiv = document.createElement('div');
             wikiResultDiv.className = 'result';
             wikiResultDiv.id = 'wikidefcontainer';
+    var loaderdiv = document.createElement("div");
+    loaderdiv.classList = "loader33";
+			wikiResultDiv.appendChild(loaderdiv) 
             resultsContainer.appendChild(wikiResultDiv);
 
             wikisearch(input, 0.5).then(y => {
+				loaderdiv.remove()
                 if (y != null) {
                     wikiResultDiv.innerHTML = `
                         <small>From Wikipedia</small>
