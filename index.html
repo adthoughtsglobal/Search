@@ -399,7 +399,7 @@
             if (input.endsWith("meaning")) {
                 input = input.split(/\s+/)[0];
             }
-			const isWhatIsQuestion = e.startsWith("what is a") || e.startsWith("what is an") || e.startsWith("what is");
+			const isWhatIsQuestion = input.startsWith("what is a") || input.startsWith("what is an") || input.startsWith("what is");
 			 if (isWhatIsQuestion) {			
 				input = input.replace(/^(what is an |what is a |what is )\s*/i, "").replace(/\?$/, "").trim();
 			 }
