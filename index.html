@@ -354,8 +354,8 @@
 							let y = await wikisearch(input,0.5);
 							if (y != null) {
 								resultsContainer.innerHTML += `<div class="result" id="definition">
-							<small>Wikipedia</small>
-			<p id="definitiontext">${y + "."}</p>
+							<small>From Wikipedia</small>
+			<p id="definitiontext" style="display: block;margin-top: 0.5rem;">${y}</p>
 			
 		</div>`
 							}
