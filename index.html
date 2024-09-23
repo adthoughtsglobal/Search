@@ -431,7 +431,6 @@
 		// wiki
 
 function calculateScore(searchTerm, question) {
-  cl("> Running jaccard test")
   const normalizedSearchTerm = searchTerm.toLowerCase();
   const normalizedQuestion = question.toLowerCase();
 
@@ -542,7 +541,6 @@ async function fetchFirst5Lines(title) {
 }
 
 async function wikisearch(text, threshold = 0.0, numRelatedArticles = 5) {
-  cl("searching wikipedia");
   try {
 
     const apiUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&utf8=1&origin=*&srsearch=${encodeURIComponent(
@@ -572,7 +570,6 @@ async function wikisearch(text, threshold = 0.0, numRelatedArticles = 5) {
         const snippet = await fetchFirst5Lines(bestMatch.title);
 
         const formattedResult = `<b>${bestMatch.title}</b> <br> ${snippet}... <a href="https://en.wikipedia.org/wiki/${bestMatch.title}">Learn more</a><br>`;
-        cl("> result found with snippet, returning");
         return formattedResult;
       } else {
 
@@ -584,17 +581,14 @@ async function wikisearch(text, threshold = 0.0, numRelatedArticles = 5) {
             (article) =>
               `<div class="wikiacl"><b>${article.title}</b> :  ${article.description}... <a href="https://en.wikipedia.org/wiki/${article.title}">Learn more</a></div>`
           );
-          cl("> no single result meets the threshold, returning related articles");
           return formattedResults.join("");
         } else {
 
-          cl("> no related articles");
           return null;
         }
       }
     } else {
 
-      cl("> no results");
       return null;
     }
   } catch (error) {
